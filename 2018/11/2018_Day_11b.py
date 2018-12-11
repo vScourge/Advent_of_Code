@@ -104,9 +104,6 @@ def get_square_power( grid, pos, size ):
 ### MAIN ###
 
 if __name__ == "__main__":
-	"""
-
-	"""
 	time_start = time.time( )
 
 	serial_num = 3031
