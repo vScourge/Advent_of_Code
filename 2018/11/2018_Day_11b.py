@@ -89,13 +89,15 @@ import numpy
 def get_power_level( coords, serial_num ):
 	rack_id = coords[ 0 ] + 10
 	power = int( '000' + str( ( rack_id * coords[ 1 ] + serial_num ) * rack_id )[ -3 ] ) - 5
+
 	return power
 
 
 def get_square_power( grid, pos, size ):
-	power = 0
-
-	square = grid[ pos[0]:pos[0]+size, pos[1]:pos[1]+size ]
+	"""
+	Get 2D slice of overall grid, then sum its values
+	"""
+	square = grid[ pos[ 0 ]:pos[ 0 ] + size, pos[ 1 ]:pos[ 1 ] + size ]
 	power = numpy.sum( square )
 
 	return power
@@ -113,16 +115,16 @@ if __name__ == "__main__":
 
 	for y in range( 300 ):
 		for x in range( 300 ):
-			grid[ ( x, y ) ] = get_power_level( (x,y), serial_num )
+			grid[ ( x, y ) ] = get_power_level( ( x, y ), serial_num )
 
-	# Find square with most power
+	# Find square of any size with most power
 	top_coords = None
 	top_size = 0
 	top_power = 0
 
 	for y in range( 300 ):
 		for x in range( 300 ):
-			coords = (x,y)
+			coords = ( x, y )
 			max_size = min( [ 300 - coords[ 0 ], 300 - coords[ 1 ] ] )
 
 			for size in range( 1, max_size + 1 ):
@@ -133,7 +135,7 @@ if __name__ == "__main__":
 					top_power = power
 					top_size = size
 
-		print( '({0},{1}) {2}'.format( coords[0]+1, coords[1]+1, size ) )
+		print( '({0},{1}) {2}'.format( coords[ 0 ] + 1, coords[ 1 ] + 1, size ) )
 
 	print( 'square coord, size with most power = {0},{1},{2}, power = {3}'.format( top_coords[0], top_coords[1], top_size, top_power ) )
 	print( 'done in {0:02} secs'.format( time.time( ) - time_start ) )
