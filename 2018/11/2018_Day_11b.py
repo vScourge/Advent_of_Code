@@ -87,9 +87,6 @@ import numpy
 ### FUNCTIONS ###
 
 def get_power_level( coords, serial_num ):
-	"""
-	"""
-
 	rack_id = coords[ 0 ] + 10
 	power = int( '000' + str( ( rack_id * coords[ 1 ] + serial_num ) * rack_id )[ -3 ] ) - 5
 	return power
@@ -113,7 +110,6 @@ if __name__ == "__main__":
 	time_start = time.time( )
 
 	serial_num = 3031
-	#serial_num = 42
 
 	# Populate grid with power levels
 	grid = numpy.zeros( ( 300, 300 ), dtype = numpy.int )
