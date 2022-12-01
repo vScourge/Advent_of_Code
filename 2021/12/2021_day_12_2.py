@@ -1,0 +1,282 @@
+"""
+--- Day 12: Passage Pathing ---
+With your submarine's subterranean subsystems subsisting suboptimally, the only way you're getting out of this cave 
+anytime soon is by finding a path yourself. Not just a path - the only way to know if you've found the best path is to find all of them.
+
+Fortunately, the sensors are still mostly working, and so you build a rough map of the remaining caves (your puzzle input). 
+For example:
+
+start-A
+start-b
+A-c
+A-b
+b-d
+A-end
+b-end
+
+This is a list of how all of the caves are connected. You start in the cave named start, and your destination is the 
+cave named end. An entry like b-d means that cave b is connected to cave d - that is, you can move between them.
+
+So, the above cave system looks roughly like this:
+
+    start
+    /   \
+c--A-----b--d
+    \   /
+     end
+	 
+Your goal is to find the number of distinct paths that start at start, end at end, and don't visit small caves more 
+than once. There are two types of caves: big caves (written in uppercase, like A) and small caves (written in lowercase, 
+like b). It would be a waste of time to visit any small cave more than once, but big caves are large enough that it might 
+be worth visiting them multiple times. So, all paths you find should visit small caves at most once, and can visit big 
+caves any number of times.
+
+Given these rules, there are 10 paths through this example cave system:
+
+start,A,b,A,c,A,end
+start,A,b,A,end
+start,A,b,end
+start,A,c,A,b,A,end
+start,A,c,A,b,end
+start,A,c,A,end
+start,A,end
+start,b,A,c,A,end
+start,b,A,end
+start,b,end
+
+(Each line in the above list corresponds to a single path; the caves visited by that path are listed in the order they a
+re visited and separated by commas.)
+
+Note that in this cave system, cave d is never visited by any path: to do so, cave b would need to be visited twice 
+(once on the way to cave d and a second time when returning from cave d), and since cave b is small, this is not allowed.
+
+Here is a slightly larger example:
+
+dc-end
+HN-start
+start-kj
+dc-start
+dc-HN
+LN-dc
+HN-end
+kj-sa
+kj-HN
+kj-dc
+
+The 19 paths through it are as follows:
+
+start,HN,dc,HN,end
+start,HN,dc,HN,kj,HN,end
+start,HN,dc,end
+start,HN,dc,kj,HN,end
+start,HN,end
+start,HN,kj,HN,dc,HN,end
+start,HN,kj,HN,dc,end
+start,HN,kj,HN,end
+start,HN,kj,dc,HN,end
+start,HN,kj,dc,end
+start,dc,HN,end
+start,dc,HN,kj,HN,end
+start,dc,end
+start,dc,kj,HN,end
+start,kj,HN,dc,HN,end
+start,kj,HN,dc,end
+start,kj,HN,end
+start,kj,dc,HN,end
+start,kj,dc,end
+
+Finally, this even larger example has 226 paths through it:
+
+fs-end
+he-DX
+fs-he
+start-DX
+pj-DX
+end-zg
+zg-sl
+zg-pj
+pj-he
+RW-he
+fs-DX
+pj-RW
+zg-RW
+start-pj
+he-WI
+zg-he
+pj-fs
+start-RW
+
+How many paths through this cave system are there that visit small caves at most once?
+
+
+--- Part Two ---
+After reviewing the available paths, you realize you might have time to visit a single small cave twice. 
+Specifically, big caves can be visited any number of times, a single small cave can be visited at most twice, 
+and the remaining small caves can be visited at most once. However, the caves named start and end can only be 
+visited exactly once each: once you leave the start cave, you may not return to it, and once you reach the end 
+cave, the path must end immediately.
+
+Now, the 36 possible paths through the first example above are:
+
+start,A,b,A,b,A,c,A,end
+start,A,b,A,b,A,end
+start,A,b,A,b,end
+start,A,b,A,c,A,b,A,end
+start,A,b,A,c,A,b,end
+start,A,b,A,c,A,c,A,end
+start,A,b,A,c,A,end
+start,A,b,A,end
+start,A,b,d,b,A,c,A,end
+start,A,b,d,b,A,end
+start,A,b,d,b,end
+start,A,b,end
+start,A,c,A,b,A,b,A,end
+start,A,c,A,b,A,b,end
+start,A,c,A,b,A,c,A,end
+start,A,c,A,b,A,end
+start,A,c,A,b,d,b,A,end
+start,A,c,A,b,d,b,end
+start,A,c,A,b,end
+start,A,c,A,c,A,b,A,end
+start,A,c,A,c,A,b,end
+start,A,c,A,c,A,end
+start,A,c,A,end
+start,A,end
+start,b,A,b,A,c,A,end
+start,b,A,b,A,end
+start,b,A,b,end
+start,b,A,c,A,b,A,end
+start,b,A,c,A,b,end
+start,b,A,c,A,c,A,end
+start,b,A,c,A,end
+start,b,A,end
+start,b,d,b,A,c,A,end
+start,b,d,b,A,end
+start,b,d,b,end
+start,b,end
+
+The slightly larger example above now has 103 paths through it, and the even larger example now has 3509 paths through it.
+
+Given these new rules, how many paths through this cave system are there?
+"""
+
+import collections
+import string
+import sys
+import numpy
+
+SMALL = 0
+BIG = 1
+
+
+class Cave( ):
+	def __init__( self, name ):
+		self.name = name
+		self.links = [ ]
+		self.visited = False
+
+		if name[ 0 ] in string.ascii_uppercase:
+			self.size = BIG
+		else:
+			self.size = SMALL
+
+	def __repr__( self ):
+		return '<Cave "{0}">'.format( self.name )
+	
+
+def parse_input( ):
+	#data = numpy.array( [ ] )
+	
+	data = { }
+	
+	for line in open( 'input0.txt', 'r' ):
+		name1, name2 = line.strip( ).split( '-' )
+		
+		if name1 in data:
+			cave1 = data[ name1 ]
+		else:
+			cave1 = Cave( name1 )
+
+		if name2 in data:
+			cave2 = data[ name2 ]
+		else:
+			cave2 = Cave( name2 )
+
+		cave1.links.append( cave2 )
+		cave2.links.append( cave1 )
+		
+		data[ name1 ] = cave1
+		data[ name2 ] = cave2
+		
+	return data
+
+
+def pathfind( start, goal ):
+	"""
+	http://ai-depot.com/Tutorial/PathFinding.html
+	https://web.archive.org/web/20200204071343/http://ai-depot.com/Tutorial/PathFinding.html
+	"""
+	full_paths = [ ]
+	paths = collections.deque( [ ( start, ) ] )
+
+	while True:
+		if not paths:
+			return full_paths
+		
+		cur_path = paths.pop( )
+		
+		if cur_path in full_paths:
+			continue
+		
+		#visited_one_small_twice = False
+		visited_smalls = [ x for x in cur_path if x.size == SMALL ]
+		visited_one_small_twice = len( visited_smalls ) > len( set( visited_smalls ) )
+		
+		new_paths = [ ]
+
+		links = collections.deque( [ ] )
+		
+		for link in cur_path[ -1 ].links:
+			if link.size == SMALL:
+				if link == start:
+					continue
+				
+				if link != goal:
+					if link in visited_smalls:
+						if visited_one_small_twice:
+							continue
+						else:
+							visited_one_small_twice = True
+							visited_smalls.append( link )
+					else:
+						visited_smalls.append( link )
+					
+			links.append( link )
+			
+		for link in links:
+			new_paths.append( tuple( list( cur_path ) + [ link ] ) )
+
+		paths += new_paths
+
+		# If we run out of paths, we've failed
+		if not paths:
+			return full_paths
+
+		# If a path has the goal at end, we've succeeded
+		for path in paths:
+			if path[ -1 ] == goal:
+				if path not in full_paths:
+					full_paths.append( path )
+
+	
+
+data = parse_input( )
+
+paths = pathfind( data[ 'start' ], data[ 'end' ] )
+
+print( len( paths ) )
+
+for p in paths:
+	print( p )
+
+# 4011
