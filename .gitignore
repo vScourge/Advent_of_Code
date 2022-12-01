@@ -7,4 +7,4 @@ __pycache__/*.*
 *.wpu
 *.wpu
 2018/aoc_2018.wpu
-input.txt
+input*.txt
