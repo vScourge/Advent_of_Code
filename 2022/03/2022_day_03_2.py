@@ -90,11 +90,11 @@ total = 0
 	
 for line in open('input.txt', 'r'):
 	if len(group_lines) < 3:
-		group_lines.append(line.strip())
+		group_lines.append(set(line.strip()))
 		
 		if len(group_lines) == 3:
 			# Process this set of 3 lines
-			item = list(set(group_lines[0]).intersection(set(group_lines[1])).intersection(set(group_lines[2])))[0]
+			item = list(group_lines[0].intersection(group_lines[1]).intersection(group_lines[2]))[0]
 			
 			if item.islower():
 				priority = ord(item) - 96
