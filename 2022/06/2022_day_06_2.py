@@ -71,8 +71,8 @@ for line in open('input.txt', 'r'):
 	line = line.strip()
 	
 for i in range(marker_length, len(line)):
-	seq = line[i - marker_length:i]
+	marker = line[i - marker_length:i]
 	
-	if len(seq) == len(set(seq)):
+	if len(marker) == len(set(marker)):
 		print('answer =', i)
 		break
