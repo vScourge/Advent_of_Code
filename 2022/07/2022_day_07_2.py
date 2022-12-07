@@ -98,17 +98,49 @@ sizes. In the example above, these directories are a and e; the sum of their tot
 
 Find all of the directories with a total size of at most 100000. What is the sum of the total sizes of those 
 directories?
+
+--- Part Two ---
+Now, you're ready to choose a directory to delete.
+
+The total disk space available to the filesystem is 70000000. To run the update, you need unused space of at
+least 30000000. You need to find a directory you can delete that will free up enough space to run the update.
+
+In the example above, the total size of the outermost directory (and thus the total amount of used space) is 48381165;
+this means that the size of the unused space must currently be 21618835, which isn't quite the 30000000 required by
+the update. Therefore, the update still requires a directory with total size of at least 8381165 to be deleted before
+it can run.
+
+To achieve this, you have the following options:
+
+Delete directory e, which would increase unused space by 584.
+Delete directory a, which would increase unused space by 94853.
+Delete directory d, which would increase unused space by 24933642.
+Delete directory /, which would increase unused space by 48381165.
+
+Directories e and a are both too small; deleting them would not free up enough space. However, directories d and / are
+both big enough! Between these, choose the smallest: d, increasing unused space by 24933642.
+
+Find the smallest directory that, if deleted, would free up enough space on the filesystem to run the update. What is
+the total size of that directory?
 """
+
+TYPE_DIRECTORY	= 0
+TYPE_FILE		= 1
+
 
 class Directory:
 	def __init__(self, name: str, parent: str):
 		self.name = name
 		self.parent = parent
 		self.files = { }
-		self.size = 0		# calculate later
+		self.size = 0	# calculate later
 		
 	def __repr__(self):
 		return '<Directory "{0}" size={1}>'.format(self.name, self.size)
+	
+	def __lt__(self, other):
+		# Allows these objects to be sorted, by size
+		return self.size < other.size
 		
 
 class File:
@@ -121,7 +153,7 @@ class File:
 		return '<File "{0}">, size={1}'.format(self.name, self.size)
 
 
-def get_dir_size_recurse(tree_data, directory) -> int:
+def get_dir_size_recurse(tree_data: list, directory: Directory) -> int:
 	# Start with size of all files in this dir
 	total = sum([f.size for f in directory.files.values()])
 	
@@ -140,7 +172,7 @@ def get_dir_size_recurse(tree_data, directory) -> int:
 
 def parse_input() -> list:
 	# Returns a list of all directories as Directory objects
-	
+
 	tree_data = [ ]
 	cur_dir = None
 	
@@ -184,7 +216,15 @@ def parse_input() -> list:
 if __name__ == '__main__':
 	tree_data = parse_input()
 	
-	large_dirs = [d for d in tree_data if d.size <= 100000]
-	total = sum([d.size for d in large_dirs])
+	total_space = 70000000
+	space_required = 30000000
+
+	used_space = [d for d in tree_data if d.name == '/'][0].size
+	free_space = total_space - used_space
 	
-	print('answer =', total)
+	space_to_free = space_required - free_space
+	
+	candidate_dirs = [d for d in tree_data if d.size >= space_to_free]
+	candidate_dirs.sort()
+
+	print('answer =', candidate_dirs[0].size)
