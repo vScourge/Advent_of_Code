@@ -111,35 +111,34 @@ TYPE_DIRECTORY	= 0
 TYPE_FILE		= 1
 
 
-class Directory():
-	def __init__(self, name: str, parent: str):
+class Entry():
+	def __init__(self, name: str, type: int, parent: str):
 		self.name = name
+		self.type = type
 		self.parent = parent
-		self.files = { }
+		self.children = { }
+		self.size = 0
 		
-	def __repr__(self):
-		return '<Directory "{0}">'.format(self.name)
-		
-
-class File():
-	def __init__(self, name: str, parent: str, size: int):
-		self.name = name
-		self.parent = parent
-		self.size = size
+	def calculate_size(self):
+		pass
 	
-	def __repr__(self):
-		return '<File "{0}">'.format(self.name)
 
-def get_dir_size(tree_data, dir_name):
-	pass
+def process_directory_recurse(tree_data, lines):
+	for line in lines:
+		if line.startswith
+		dir_name = line.split(' ')[-1]
+		entry = Entry(dir_name, TYPE_DIRECTORY, cur_dir)
+		cur_dir = entry
+	
+	return tree_data
+	
 	
 
 def parse_input():
-	tree_data = { }
+	tree_data = {}
 	cur_dir = None
 	
 	lines = open('input0.txt', 'r').readlines()
-	lines = [l.strip() for l in lines]
 	
 	for i in range(len(lines)):
 		line = lines[i]
@@ -148,31 +147,18 @@ def parse_input():
 			cur_dir = cur_dir.parent
 
 		elif line.startswith('$ cd'):
-			dir_name = line.split(' ')[-1]
-			new_dir = Directory(dir_name, cur_dir)
-			tree_data[dir_name] = new_dir
-			cur_dir = new_dir
-			
-		elif line == '$ ls':
+			dir_lines = [line]
 			j = i+1
 			
-			while not lines[j].startswith('$') and j < len(lines)-1:
-				if not lines[j].startswith('dir'):
-					# It's a file
-					size, filename = lines[j].split(' ')
-					size = int(size)
-					file = File(filename, cur_dir, size)
-					cur_dir.files[filename] = file
-					
+			while not lines[j].startswith('$'):
+				dir_lines.append(lines[j])
 				j += 1
-
-	# Calculate size of each folder
-	
-	
-	return tree_data			
+			
+			tree_data = process_directory_recurse(tree_data, dir_lines)
+							
+			
 
 
 if __name__ == '__main__':
-	tree_data = parse_input()
-
+	parse_input()
 	
