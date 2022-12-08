@@ -87,7 +87,7 @@ if __name__ == '__main__':
 	size_y = len(data)
 	size_x = len(data[0])
 
-	# Count with all border trees, which are all visible from edge
+	# Count border trees, which are all visible from edge
 	num_visible = size_y * 2 + size_x * 2 - 4
 	
 	for y in range(size_y-2):
