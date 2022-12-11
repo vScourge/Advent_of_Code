@@ -370,11 +370,11 @@ def parse_input() -> list:
 if __name__ == '__main__':
 	data = parse_input()
 	
-	# Find multiple of all the monkeys' test values. Used below to reduce the size of the worry values
-	common_mult = 1
+	# Multiply all the monkeys' test values. Used below to reduce the size of the worry values
+	group_mult = 1
 
 	for t in [m.test for m in data.values()]:
-		common_mult *= t
+		group_mult *= t
 		
 	for round in range(10000):
 		for i in range(len(data)):
@@ -390,7 +390,7 @@ if __name__ == '__main__':
 				
 				# Reduce worry value to keep it from getting too large.
 				# Just store the modulus, which tests the same because we're only doing mult and add
-				worry = worry % common_mult
+				worry = worry % group_mult
 				
 				if worry % monkey.test == 0:
 					t = monkey.targets[0]
