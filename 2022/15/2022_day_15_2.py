@@ -120,9 +120,22 @@ In this example, in the row where y=10, there are 26 positions where a beacon ca
 
 Consult the report from the sensors you just deployed. In the row where y=2000000, how many positions cannot contain 
 a beacon?
+
+--- Part Two ---
+Your handheld device indicates that the distress signal is coming from a beacon nearby. The distress beacon is not
+detected by any sensor, but the distress beacon must have x and y coordinates each no lower than 0 and no larger
+than 4000000.
+
+To isolate the distress beacon's signal, you need to determine its tuning frequency, which can be found by multiplying
+its x coordinate by 4000000 and then adding its y coordinate.
+
+In the example above, the search space is smaller: instead, the x and y coordinates can each be at most 20. With this
+reduced search area, there is only a single position that could have a beacon: x=14, y=11. The tuning frequency for
+this distress beacon is 56000011.
+
+Find the only possible position for the distress beacon. What is its tuning frequency?
 """
 
-import numpy
 import sys
 import time
 
@@ -187,35 +200,43 @@ if __name__ == '__main__':
 	# First get the max distances any beacon is from its sensor.
 	# This will help us get the largest radius needed to test along our row
 	max_dist = max([n.distance for n in beacons])
-	min_x = min([n.x - n.distance - max_dist for n in sensors])
-	max_x = max([n.x + n.distance + max_dist for n in sensors])
+	min_x = max(min([n.x - n.distance - max_dist for n in sensors]), 0)
+	max_x = min(max([n.x + n.distance + max_dist for n in sensors]), 4000000)
+	min_y = max(min([n.y - n.distance - max_dist for n in sensors]), 0)
+	max_y = min(max([n.y + n.distance + max_dist for n in sensors]), 4000000)
 
-	y = 2000000
+	#y = 2000000
+	grid_points = set()
 	points = set()
 	occupied = [(p.y, p.x) for p in sensors + beacons]
 	c = 1
 	last_progress = ''
 	
-	for x in range(min_x, max_x):
-		if (y, x) in occupied:
-			continue
-		
-		progress = '{0:0.1f}%'.format(c / (max_x - min_x) * 100)
-		if progress != last_progress:
-			print(progress)
-			last_progress = progress
+	for y in range(min_y, max_y):
+		for x in range(min_x, max_x):
+			if (y, x) in occupied:
+				continue
 			
-		c += 1
-		
-		point = Point2(y, x)
-		
-		for sensor in sensors:
-			#print('point = {0}, sensor = {1}, dist = {2}'.format(point, sensor, sensor.distance))
-			if get_distance(sensor, point) <= sensor.distance:
-				points.add(point)
-				break
+			progress = '{0:0.5f}%'.format(c / (max_x * max_y) * 100)
+			if progress != last_progress:
+				print(progress)
+				last_progress = progress
+				
+			c += 1
+			
+			point = Point2(y, x)
+			grid_points.add(point)
+			
+			for sensor in sensors:
+				#print('point = {0}, sensor = {1}, dist = {2}'.format(point, sensor, sensor.distance))
+				if get_distance(sensor, point) <= sensor.distance:
+					points.add(point)
+					break
+
+	open_point = list(grid_points.difference(points))[0]
+	answer = open_point.x * 4000000 + open_point.y
 	
-	print('answer =', len(points))
+	print('answer =', answer)
 	print('time = {0:0.2f}'.format(time.time() - time_start))
 
 # 5379909 too high
